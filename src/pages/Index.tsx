@@ -5,6 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
 
@@ -12,6 +16,10 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [awardTypeFilter, setAwardTypeFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [newEmployee, setNewEmployee] = useState({ fullName: '', position: '', personnelNumber: '', awardType: '', reason: '' });
 
   // Моковые данные для демонстрации
   const awardOrders = [
@@ -20,6 +28,60 @@ const Index = () => {
     { id: 3, number: 'П-003', date: '20.07.2025', type: 'Благодарность', status: 'draft', employees: 5, approver: '-' },
     { id: 4, number: 'П-004', date: '22.07.2025', type: 'Медаль', status: 'rejected', employees: 3, approver: 'Сидоров С.С.' },
   ];
+
+  // Моковые данные сотрудников для выбранного приказа
+  const mockEmployees = {
+    1: [
+      { id: 1, fullName: 'Иванов Иван Иванович', position: 'Главный инженер', personnelNumber: '001234', awardType: 'Медаль "За трудовые заслуги"', reason: 'За выдающиеся достижения в области инженерных разработок', status: 'approved', approvedBy: 'Иванов И.И.', approvedDate: '16.07.2025' },
+      { id: 2, fullName: 'Петрова Мария Сергеевна', position: 'Ведущий специалист', personnelNumber: '001235', awardType: 'Почётная грамота', reason: 'За высокие результаты в работе и профессионализм', status: 'pending', approvedBy: '', approvedDate: '' },
+      { id: 3, fullName: 'Сидоров Алексей Петрович', position: 'Начальник отдела', personnelNumber: '001236', awardType: 'Благодарность', reason: 'За эффективное руководство подразделением', status: 'rejected', approvedBy: 'Иванов И.И.', approvedDate: '16.07.2025', rejectionReason: 'Недостаточный стаж работы' }
+    ],
+    2: [
+      { id: 4, fullName: 'Козлов Дмитрий Александрович', position: 'Старший менеджер', personnelNumber: '001237', awardType: 'Почётная грамота', reason: 'За отличную работу с клиентами', status: 'pending', approvedBy: '', approvedDate: '' }
+    ]
+  };
+
+  const awardTypes = [
+    'Медаль "За трудовые заслуги"',
+    'Почётная грамота Министерства',
+    'Благодарность руководства',
+    'Медаль "Ветеран труда"',
+    'Почётный знак "За заслуги"'
+  ];
+
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    setEmployees(mockEmployees[order.id] || []);
+    setIsOrderDialogOpen(true);
+  };
+
+  const handleAddEmployee = () => {
+    if (newEmployee.fullName && newEmployee.position) {
+      const employee = {
+        id: Date.now(),
+        ...newEmployee,
+        status: 'pending',
+        approvedBy: '',
+        approvedDate: ''
+      };
+      setEmployees([...employees, employee]);
+      setNewEmployee({ fullName: '', position: '', personnelNumber: '', awardType: '', reason: '' });
+    }
+  };
+
+  const handleEmployeeStatusChange = (employeeId, newStatus, reason = '') => {
+    setEmployees(employees.map(emp => 
+      emp.id === employeeId 
+        ? { 
+            ...emp, 
+            status: newStatus, 
+            approvedBy: newStatus !== 'pending' ? 'Иванов И.И.' : '', 
+            approvedDate: newStatus !== 'pending' ? new Date().toLocaleDateString('ru-RU') : '',
+            rejectionReason: newStatus === 'rejected' ? reason : ''
+          } 
+        : emp
+    ));
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -195,10 +257,10 @@ const Index = () => {
                       <TableCell className="text-gray-600">{order.approver}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleOrderClick(order)}>
                             <Icon name="Eye" size={16} />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleOrderClick(order)}>
                             <Icon name="Edit" size={16} />
                           </Button>
                           <Button variant="ghost" size="sm">
@@ -251,6 +313,235 @@ const Index = () => {
             </Card>
           </div>
         </div>
+
+        {/* Диалоговое окно управления сотрудниками */}
+        <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
+          <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">
+                Управление приказом {selectedOrder?.number} - {selectedOrder?.type}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Tabs defaultValue="employees" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="employees">Список сотрудников</TabsTrigger>
+                <TabsTrigger value="add-employee">Добавить сотрудника</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="employees" className="space-y-4">
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="font-semibold">ФИО</TableHead>
+                        <TableHead className="font-semibold">Должность</TableHead>
+                        <TableHead className="font-semibold">Табельный №</TableHead>
+                        <TableHead className="font-semibold">Тип награды</TableHead>
+                        <TableHead className="font-semibold">Статус</TableHead>
+                        <TableHead className="font-semibold text-right">Действия</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {employees.map((employee) => (
+                        <TableRow key={employee.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{employee.fullName}</TableCell>
+                          <TableCell>{employee.position}</TableCell>
+                          <TableCell>{employee.personnelNumber}</TableCell>
+                          <TableCell>{employee.awardType}</TableCell>
+                          <TableCell>{getStatusBadge(employee.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              {employee.status === 'pending' && (
+                                <>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600 border-green-200 hover:bg-green-50"
+                                    onClick={() => handleEmployeeStatusChange(employee.id, 'approved')}
+                                  >
+                                    <Icon name="Check" size={16} className="mr-1" />
+                                    Утвердить
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => {
+                                      const reason = prompt('Укажите причину отклонения:');
+                                      if (reason) handleEmployeeStatusChange(employee.id, 'rejected', reason);
+                                    }}
+                                  >
+                                    <Icon name="X" size={16} className="mr-1" />
+                                    Отклонить
+                                  </Button>
+                                </>
+                              )}
+                              {employee.status === 'approved' && (
+                                <span className="text-sm text-gray-500">
+                                  Утверждено {employee.approvedDate} ({employee.approvedBy})
+                                </span>
+                              )}
+                              {employee.status === 'rejected' && (
+                                <div className="text-sm text-red-600">
+                                  <div>Отклонено {employee.approvedDate}</div>
+                                  <div className="text-xs">{employee.rejectionReason}</div>
+                                </div>
+                              )}
+                              <Button variant="ghost" size="sm">
+                                <Icon name="Trash2" size={16} className="text-red-500" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {employees.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      <Icon name="Users" size={48} className="mx-auto mb-4 text-gray-300" />
+                      <p>В приказе пока нет сотрудников</p>
+                      <p className="text-sm">Добавьте сотрудников для награждения</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="add-employee" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Добавить сотрудника для награждения</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName">ФИО сотрудника *</Label>
+                        <Input
+                          id="fullName"
+                          placeholder="Иванов Иван Иванович"
+                          value={newEmployee.fullName}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, fullName: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="position">Должность *</Label>
+                        <Input
+                          id="position"
+                          placeholder="Главный специалист"
+                          value={newEmployee.position}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="personnelNumber">Табельный номер</Label>
+                        <Input
+                          id="personnelNumber"
+                          placeholder="001234"
+                          value={newEmployee.personnelNumber}
+                          onChange={(e) => setNewEmployee({ ...newEmployee, personnelNumber: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="awardType">Тип награды</Label>
+                        <Select value={newEmployee.awardType} onValueChange={(value) => setNewEmployee({ ...newEmployee, awardType: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Выберите тип награды" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {awardTypes.map((type) => (
+                              <SelectItem key={type} value={type}>{type}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="reason">Основание для награждения</Label>
+                      <Textarea
+                        id="reason"
+                        placeholder="За выдающиеся достижения в области..."
+                        value={newEmployee.reason}
+                        onChange={(e) => setNewEmployee({ ...newEmployee, reason: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-end space-x-2 pt-4">
+                      <Button variant="outline" onClick={() => setNewEmployee({ fullName: '', position: '', personnelNumber: '', awardType: '', reason: '' })}>
+                        Очистить
+                      </Button>
+                      <Button onClick={handleAddEmployee} disabled={!newEmployee.fullName || !newEmployee.position}>
+                        <Icon name="Plus" size={16} className="mr-2" />
+                        Добавить сотрудника
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Автоподстановка данных сотрудников */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Быстрое добавление</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">Часто награждаемые сотрудники:</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {[
+                          { name: 'Козлов Дмитрий Александрович', position: 'Старший менеджер', number: '001237' },
+                          { name: 'Смирнова Елена Викторовна', position: 'Ведущий экономист', number: '001238' },
+                          { name: 'Новиков Артём Сергеевич', position: 'Главный инженер', number: '001239' },
+                          { name: 'Волкова Анна Михайловна', position: 'Начальник отдела', number: '001240' }
+                        ].map((emp) => (
+                          <Button 
+                            key={emp.number} 
+                            variant="outline" 
+                            size="sm" 
+                            className="justify-start text-left h-auto p-2"
+                            onClick={() => setNewEmployee({ 
+                              fullName: emp.name, 
+                              position: emp.position, 
+                              personnelNumber: emp.number,
+                              awardType: '',
+                              reason: ''
+                            })}
+                          >
+                            <div>
+                              <div className="font-medium">{emp.name}</div>
+                              <div className="text-xs text-gray-500">{emp.position}</div>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-gray-600">
+                Всего сотрудников: {employees.length} | 
+                Утверждено: {employees.filter(e => e.status === 'approved').length} | 
+                Ожидает: {employees.filter(e => e.status === 'pending').length} | 
+                Отклонено: {employees.filter(e => e.status === 'rejected').length}
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={() => setIsOrderDialogOpen(false)}>
+                  Закрыть
+                </Button>
+                <Button>
+                  <Icon name="Save" size={16} className="mr-2" />
+                  Сохранить изменения
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
