@@ -14,7 +14,125 @@ import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
 
+// Helper function to get notification icon based on type
+const getNotificationIcon = (type: string): string => {
+  const iconMap: { [key: string]: string } = {
+    'pending_approval': 'Clock',
+    'approved': 'CheckCircle',
+    'rejected': 'XCircle',
+    'deadline': 'AlertTriangle',
+    'info': 'Info',
+    'warning': 'AlertTriangle'
+  };
+  return iconMap[type] || 'Bell';
+};
+
+// Helper function to get notification color class based on type
+const getNotificationColor = (type: string): string => {
+  const colorMap: { [key: string]: string } = {
+    'pending_approval': 'text-yellow-600',
+    'approved': 'text-green-600',
+    'rejected': 'text-red-600',
+    'deadline': 'text-orange-600',
+    'info': 'text-blue-600',
+    'warning': 'text-orange-600'
+  };
+  return colorMap[type] || 'text-gray-600';
+};
+
+// Helper function to generate order from template
+const generateOrderFromTemplate = (templateData: { template: string }, orderData: { number: string; date: string }): string => {
+  let result = templateData.template;
+  result = result.replace('{orderNumber}', orderData.number);
+  result = result.replace('{date}', orderData.date);
+  result = result.replace('{employeesList}', 'Список сотрудников будет добавлен при формировании окончательного приказа');
+  return result;
+};
+
+// Helper function to generate sample order template
+const образецПриказа = (orderData: any): string => {
+  const eventNames: { [key: string]: string } = {
+    'день-ржд': 'в связи с Днём работников железнодорожного транспорта',
+    'проф-праздник': 'в связи с профессиональным праздником',
+    'новый-год': 'в связи с Новогодними праздниками',
+    'день-победы': 'в связи с Днём Победы',
+    'юбилей': 'в связи с юбилеем предприятия',
+    'досрочное': 'за досрочные достижения'
+  };
+
+  return `ОАО "Российские железные дороги"
+
+ПРИКАЗ № П-XXX от ${new Date(orderData.date).toLocaleDateString('ru-RU')}
+
+${orderData.title}
+
+${eventNames[orderData.event] || ''}
+
+За высокие показатели в трудовой деятельности, профессиональное мастерство и долголетний добросовестный труд НАГРАДИТЬ:
+
+Типы наград: ${orderData.selectedAwards.join(', ')}
+
+[Список сотрудников будет добавлен при формировании]
+
+Руководителям структурных подразделений обеспечить порядок награждения в установленные сроки.
+
+Президент ОАО "РЖД" О.В. Белозёров`;
+};
+
 const Index = () => {
+  // Helper function to get notification icon based on type
+  const getNotificationIcon = (type: string): string => {
+    const iconMap: { [key: string]: string } = {
+      'pending_approval': 'Clock',
+      'approved': 'CheckCircle',
+      'rejected': 'XCircle',
+      'deadline': 'AlertTriangle',
+      'info': 'Info',
+      'warning': 'AlertTriangle'
+    };
+    return iconMap[type] || 'Bell';
+  };
+
+  // Helper function to get notification color class based on type
+  const getNotificationColor = (type: string): string => {
+    const colorMap: { [key: string]: string } = {
+      'pending_approval': 'text-yellow-600',
+      'approved': 'text-green-600',
+      'rejected': 'text-red-600',
+      'deadline': 'text-orange-600',
+      'info': 'text-blue-600',
+      'warning': 'text-orange-600'
+    };
+    return colorMap[type] || 'text-gray-600';
+  };
+
+  // Helper function to generate order from template
+  const generateOrderFromTemplate = (templateData: { template: string }, orderData: { number: string; date: string }): string => {
+    let result = templateData.template;
+    result = result.replace('{orderNumber}', orderData.number);
+    result = result.replace('{date}', orderData.date);
+    result = result.replace('{employeesList}', 'Список сотрудников будет добавлен при формировании окончательного приказа');
+    return result;
+  };
+
+  // Helper function to generate sample order template
+  const образецПриказа = (orderData: any): string => {
+    const eventNames: { [key: string]: string } = {
+      'день-ржд': 'в связи с Днём работников железнодорожного транспорта',
+      'проф-праздник': 'в связи с профессиональным праздником',
+      'новый-год': 'в связи с Новогодними праздниками',
+      'день-победы': 'в связи с Днём Победы',
+      'юбилей': 'в связи с юбилеем предприятия',
+      'досрочное': 'за досрочные достижения'
+    };
+    
+    const selectedAwardsText = orderData.selectedAwards && orderData.selectedAwards.length > 0 
+      ? `Наградить следующими наградами:\n${orderData.selectedAwards.map((award: string, index: number) => `${index + 1}. ${award}`).join('\n')}\n\n`
+      : 'Награды будут указаны после выбора\n\n';
+    
+    return `ОАО "Российские железные дороги"\n\nПРИКАЗ № П-___ от ${orderData.date || new Date().toLocaleDateString('ru-RU')}\n\n${orderData.title || 'О награждении'}\n\n${orderData.event ? (eventNames[orderData.event] || orderData.event) + '\n\n' : ''}${selectedAwardsText}Список награждаемых сотрудников будет добавлен после создания приказа.\n\nПрезидент ОАО "РЖД" О.В. Белозёров`;
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [awardTypeFilter, setAwardTypeFilter] = useState('all');
