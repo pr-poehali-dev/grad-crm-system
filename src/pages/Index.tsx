@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
 
@@ -20,6 +22,10 @@ const Index = () => {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [newEmployee, setNewEmployee] = useState({ fullName: '', position: '', personnelNumber: '', awardType: '', reason: '' });
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
 
   // Моковые данные для демонстрации
   const awardOrders = [
@@ -47,6 +53,51 @@ const Index = () => {
     'Благодарность руководства',
     'Медаль "Ветеран труда"',
     'Почётный знак "За заслуги"'
+  ];
+
+  // Шаблоны приказов
+  const orderTemplates = [
+    {
+      id: 1,
+      name: 'Шаблон приказа о награждении медалью',
+      type: 'Медаль "За трудовые заслуги"',
+      template: `ОАО "Российские железные дороги"
+
+ПРИКАЗ № {orderNumber} от {date}
+
+О награждении медалью "За трудовые заслуги"
+
+За высокие показатели в трудовой деятельности, профессиональное мастерство и долголетний добросовестный труд НАГРАДИТЬ:
+
+{employeesList}
+
+Руководителям структурных подразделений обеспечить порядок награждения в установленные сроки.
+
+Президент ОАО "РЖД" О.В. Белозёров`
+    },
+    {
+      id: 2,
+      name: 'Шаблон приказа о почётной грамоте',
+      type: 'Почётная грамота',
+      template: `ОАО "Российские железные дороги"
+
+ПРИКАЗ № {orderNumber} от {date}
+
+О награждении почётной грамотой
+
+За отличную работу, профессионализм и добросовестный труд НАГРАДИТЬ:
+
+{employeesList}
+
+Президент ОАО "РЖД" О.В. Белозёров`
+    }
+  ];
+
+  // Моковые уведомления
+  const mockNotifications = [
+    { id: 1, type: 'pending_approval', title: 'Приказ П-002 ожидает утверждения', message: '8 сотрудников на почётную грамоту', recipient: 'Петров П.П.', date: '18.07.2025 10:30', status: 'unread' },
+    { id: 2, type: 'approved', title: 'Приказ П-001 утверждён', message: '12 сотрудников награждены медалью', recipient: 'Иванов И.И.', date: '16.07.2025 15:45', status: 'read' },
+    { id: 3, type: 'deadline', title: 'Приближается срок', message: 'Приказ П-003 нуждается в утверждении до 25.07.2025', recipient: 'Сидоров С.С.', date: '22.07.2025 09:00', status: 'unread' }
   ];
 
   const handleOrderClick = (order) => {
@@ -135,44 +186,44 @@ const Index = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Всего приказов</CardTitle>
-              <Icon name="FileText" size={20} className="text-blue-600" />
+              <Icon name="FileText" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">127</div>
-              <p className="text-xs text-green-600 mt-1">+12% за месяц</p>
+              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>127</div>
+              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-red))'}}>+12% за месяц</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Награждено сотрудников</CardTitle>
-              <Icon name="Users" size={20} className="text-green-600" />
+              <Icon name="Users" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">1,847</div>
-              <p className="text-xs text-green-600 mt-1">+8% за месяц</p>
+              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>1,847</div>
+              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-red))'}}>+8% за месяц</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">На рассмотрении</CardTitle>
-              <Icon name="Clock" size={20} className="text-yellow-600" />
+              <Icon name="Clock" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">23</div>
-              <p className="text-xs text-gray-500 mt-1">Требуют внимания</p>
+              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>23</div>
+              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Требуют внимания</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Средний срок</CardTitle>
-              <Icon name="TrendingDown" size={20} className="text-purple-600" />
+              <Icon name="TrendingDown" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">3.2</div>
-              <p className="text-xs text-gray-500 mt-1">дня на обработку</p>
+              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>3.2</div>
+              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-gray-medium))'}}>дня на обработку</p>
             </CardContent>
           </Card>
         </div>
@@ -181,7 +232,7 @@ const Index = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-semibold text-gray-900">Управление приказами</CardTitle>
+              <CardTitle className="text-xl font-semibold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Управление приказами</CardTitle>
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm">
                   <Icon name="Download" size={16} className="mr-2" />
@@ -290,25 +341,25 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="p-6 text-center">
-                <Icon name="FileText" size={48} className="mx-auto mb-3 text-blue-600" />
-                <h4 className="font-semibold text-gray-900 mb-2">Создать приказ</h4>
-                <p className="text-sm text-gray-600">Сформировать новый приказ о награждении сотрудников</p>
+                <Icon name="FileText" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
+                <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Создать приказ</h4>
+                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Сформировать новый приказ о награждении сотрудников</p>
               </CardContent>
             </Card>
 
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="p-6 text-center">
-                <Icon name="Upload" size={48} className="mx-auto mb-3 text-green-600" />
-                <h4 className="font-semibold text-gray-900 mb-2">Импорт данных</h4>
-                <p className="text-sm text-gray-600">Загрузить список сотрудников из Word или PDF файла</p>
+                <Icon name="Upload" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
+                <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Импорт данных</h4>
+                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Загрузить список сотрудников из Word или PDF файла</p>
               </CardContent>
             </Card>
 
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="p-6 text-center">
-                <Icon name="BarChart" size={48} className="mx-auto mb-3 text-purple-600" />
-                <h4 className="font-semibold text-gray-900 mb-2">Аналитика</h4>
-                <p className="text-sm text-gray-600">Просмотреть статистику и отчёты по награждениям</p>
+                <Icon name="BarChart" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
+                <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Аналитика</h4>
+                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Просмотреть статистику и отчёты по награждениям</p>
               </CardContent>
             </Card>
           </div>
@@ -537,6 +588,198 @@ const Index = () => {
                 <Button>
                   <Icon name="Save" size={16} className="mr-2" />
                   Сохранить изменения
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалоговое окно шаблонов */}
+        <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                Шаблоны приказов о награждении
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Tabs defaultValue="templates" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="templates">Готовые шаблоны</TabsTrigger>
+                <TabsTrigger value="preview">Предпросмотр приказа</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="templates" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {orderTemplates.map((template) => (
+                    <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-shadow"
+                          onClick={() => setSelectedTemplate(template.template)}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                              {template.name}
+                            </CardTitle>
+                            <p className="text-sm mt-1" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                              {template.type}
+                            </p>
+                          </div>
+                          <Icon name="FileText" size={24} style={{color: 'hsl(var(--rzd-red))'}} />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                          <p className="line-clamp-3">
+                            {template.template.substring(0, 200)}...
+                          </p>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <Badge variant="outline" style={{color: 'hsl(var(--rzd-red))', borderColor: 'hsl(var(--rzd-red))'}}>
+                            Официальный шаблон ОАО "РЖД"
+                          </Badge>
+                          <Button size="sm" variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedTemplate(template.template);
+                                  }}>
+                            Выбрать
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <Alert>
+                  <Icon name="Info" size={16} />
+                  <AlertDescription>
+                    Шаблоны соответствуют корпоративным стандартам ОАО "Российские железные дороги".
+                    Поля {'{orderNumber}'}, {'{date}'}, {'{employeesList}'} будут заменены автоматически.
+                  </AlertDescription>
+                </Alert>
+              </TabsContent>
+              
+              <TabsContent value="preview" className="space-y-4">
+                {selectedTemplate ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                        Предпросмотр приказа
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="bg-white border rounded-lg p-6">
+                        <pre className="whitespace-pre-wrap text-sm" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                          {generateOrderFromTemplate({ template: selectedTemplate }, selectedOrder || { number: 'П-XXX', date: new Date().toLocaleDateString('ru-RU') })}
+                        </pre>
+                      </div>
+                      <div className="mt-4 flex items-center justify-end space-x-2">
+                        <Button variant="outline">
+                          <Icon name="Download" size={16} className="mr-2" />
+                          Скачать Word
+                        </Button>
+                        <Button variant="outline">
+                          <Icon name="FileText" size={16} className="mr-2" />
+                          Скачать PDF
+                        </Button>
+                        <Button style={{backgroundColor: 'hsl(var(--rzd-red))', color: 'white'}}>
+                          <Icon name="Send" size={16} className="mr-2" />
+                          Отправить на подпись
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="text-center py-8" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                    <Icon name="FileText" size={48} className="mx-auto mb-4" style={{color: 'hsl(var(--rzd-gray-light))'}} />
+                    <p>Выберите шаблон для предпросмотра</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+            
+            <div className="flex items-center justify-end pt-4 border-t space-x-2">
+              <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>
+                Закрыть
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалоговое окно уведомлений */}
+        <Dialog open={notificationDialogOpen} onOpenChange={setNotificationDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[70vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                Центр уведомлений
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {mockNotifications.map((notification) => (
+                <Alert key={notification.id} className={`border-l-4 ${notification.status === 'unread' ? 'bg-blue-50' : 'bg-gray-50'}`} 
+                       style={{borderLeftColor: notification.status === 'unread' ? 'hsl(var(--rzd-red))' : 'hsl(var(--rzd-gray-light))'}}>
+                  <div className="flex items-start space-x-3">
+                    <Icon name={getNotificationIcon(notification.type)} size={20} 
+                          className={getNotificationColor(notification.type)} />
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-medium" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                            {notification.title}
+                          </h4>
+                          <p className="text-sm mt-1" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                            {notification.message}
+                          </p>
+                        </div>
+                        {notification.status === 'unread' && (
+                          <Badge style={{backgroundColor: 'hsl(var(--rzd-red))', color: 'white'}}>
+                            Новое
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="text-xs" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                          Ответственный: {notification.recipient} • {notification.date}
+                        </div>
+                        <div className="flex space-x-2">
+                          {notification.status === 'unread' && (
+                            <Button size="sm" variant="outline">
+                              <Icon name="Check" size={14} className="mr-1" />
+                              Отметить как прочитанное
+                            </Button>
+                          )}
+                          <Button size="sm" variant="outline">
+                            <Icon name="ExternalLink" size={14} className="mr-1" />
+                            Перейти
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Alert>
+              ))}
+            </div>
+            
+            {mockNotifications.length === 0 && (
+              <div className="text-center py-8" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                <Icon name="Bell" size={48} className="mx-auto mb-4" style={{color: 'hsl(var(--rzd-gray-light))'}} />
+                <p>У вас нет новых уведомлений</p>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                Всего: {mockNotifications.length} • 
+                Новых: {mockNotifications.filter(n => n.status === 'unread').length}
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm">
+                  <Icon name="CheckCheck" size={16} className="mr-2" />
+                  Отметить все как прочитанные
+                </Button>
+                <Button variant="outline" onClick={() => setNotificationDialogOpen(false)}>
+                  Закрыть
                 </Button>
               </div>
             </div>
