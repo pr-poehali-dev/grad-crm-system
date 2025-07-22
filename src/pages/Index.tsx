@@ -425,8 +425,8 @@ const Index = () => {
                       <TableCell>{order.type}</TableCell>
                       <TableCell>
                         <Badge variant="outline" style={{
-                          color: userRoles[order.department as keyof typeof userRoles].color,
-                          borderColor: userRoles[order.department as keyof typeof userRoles].color
+                          color: userRoles[order.department as keyof typeof userRoles]?.color || '#6B7280',
+                          borderColor: userRoles[order.department as keyof typeof userRoles]?.color || '#6B7280'
                         }}>
                           {getDepartmentName(order.department)}
                         </Badge>
@@ -1202,17 +1202,25 @@ const Index = () => {
                       {currentUser.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <h3 className="font-medium" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                      <h3 className="font-medium text-gray-800">
                         {currentUser.name}
                       </h3>
-                      <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                      <p className="text-sm text-gray-600">
                         {currentUser.position}
                       </p>
-                      <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                      <p className="text-sm text-gray-600">
                         {currentUser.department}
                       </p>
                       <div className="mt-2">
-                        {getRoleBadge(currentUser.role)}
+                        <Badge 
+                          style={{ 
+                            backgroundColor: userRoles[currentUser.role].bgColor, 
+                            color: userRoles[currentUser.role].color,
+                            border: `1px solid ${userRoles[currentUser.role].color}` 
+                          }}
+                        >
+                          {userRoles[currentUser.role].name}
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -1222,42 +1230,13 @@ const Index = () => {
               {/* Права доступа */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                  <CardTitle className="text-sm text-gray-800">
                     Права доступа
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(userRoles[currentUser.role].permissions).map(([key, value]) => {
-  const образецПриказа = (orderData) => {
-    const eventNames = {
-      'день-ржд': 'Дня работников железнодорожного транспорта',
-      'проф-праздник': 'Профессионального праздника',
-      'новый-год': 'Новогодних праздников',
-      'день-победы': 'Дня Победы',
-      'юбилей': 'юбилея предприятия',
-      'досрочное': 'досрочного награждения'
-    };
-    
-    return `ОАО "Российские железные дороги"
-
-ПРИКАЗ № П-___ от ${new Date(orderData.date).toLocaleDateString('ru-RU')}
-
-${orderData.title || 'О награждении'}
-
-${orderData.event ? `В связи с ${eventNames[orderData.event] || orderData.event}` : ''}
-
-${orderData.selectedAwards.length > 0 ? 
-  `Наградить следующими наградами:
-${orderData.selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}` 
-  : 'Награды будут указаны после выбора'
-}
-
-Список награждаемых сотрудников будет добавлен после создания приказа.
-
-Президент ОАО "РЖД" О.В. Белозёров`;
-  };
-
                       const labels = {
                         viewAll: 'Просмотр всех',
                         createOrders: 'Создание',
@@ -1275,7 +1254,7 @@ ${orderData.selectedAwards.map((award, index) => `${index + 1}. ${award}`).join(
                             size={14} 
                             className={value ? "text-green-600" : "text-red-400"} 
                           />
-                          <span style={{color: value ? 'hsl(var(--rzd-gray-dark))' : 'hsl(var(--rzd-gray-medium))'}}>
+                          <span className={value ? 'text-gray-800' : 'text-gray-600'}>
                             {labels[key as keyof typeof labels]}
                           </span>
                         </div>
@@ -1288,7 +1267,7 @@ ${orderData.selectedAwards.map((award, index) => `${index + 1}. ${award}`).join(
               {/* Переключатель ролей (для демо) */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                  <CardTitle className="text-sm text-gray-800">
                     Переключить роль (демо)
                   </CardTitle>
                 </CardHeader>
