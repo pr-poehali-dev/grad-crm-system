@@ -26,14 +26,82 @@ const Index = () => {
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [userProfileOpen, setUserProfileOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState({
+    id: 1,
+    name: 'Петров Петр Петрович',
+    role: 'direction', // direction, nok, center
+    department: 'Дирекция по управлению персоналом',
+    position: 'Начальник отдела кадров',
+    avatar: null
+  });
 
-  // Моковые данные для демонстрации
-  const awardOrders = [
-    { id: 1, number: 'П-001', date: '15.07.2025', type: 'За трудовые заслуги', status: 'approved', employees: 12, approver: 'Иванов И.И.' },
-    { id: 2, number: 'П-002', date: '18.07.2025', type: 'Почётная грамота', status: 'pending', employees: 8, approver: 'Петров П.П.' },
-    { id: 3, number: 'П-003', date: '20.07.2025', type: 'Благодарность', status: 'draft', employees: 5, approver: '-' },
-    { id: 4, number: 'П-004', date: '22.07.2025', type: 'Медаль', status: 'rejected', employees: 3, approver: 'Сидоров С.С.' },
+  // Система ролей и прав доступа
+  const userRoles = {
+    direction: {
+      name: 'Сотрудник дирекции',
+      permissions: {
+        viewAll: true,
+        createOrders: true,
+        editOrders: true,
+        approveOrders: true,
+        deleteOrders: true,
+        manageTemplates: true,
+        viewReports: true,
+        manageUsers: true
+      },
+      color: 'hsl(var(--rzd-red))',
+      bgColor: 'hsl(var(--rzd-red-light))'
+    },
+    nok: {
+      name: 'Сотрудник НОК',
+      permissions: {
+        viewAll: true,
+        createOrders: true,
+        editOrders: true,
+        approveOrders: false,
+        deleteOrders: false,
+        manageTemplates: false,
+        viewReports: true,
+        manageUsers: false
+      },
+      color: 'hsl(var(--rzd-gray-dark))',
+      bgColor: 'hsl(var(--rzd-gray-light))'
+    },
+    center: {
+      name: 'Сотрудник Ц',
+      permissions: {
+        viewAll: false, // видит только свои
+        createOrders: true,
+        editOrders: false,
+        approveOrders: false,
+        deleteOrders: false,
+        manageTemplates: false,
+        viewReports: false,
+        manageUsers: false
+      },
+      color: 'hsl(var(--rzd-gray-medium))',
+      bgColor: 'hsl(var(--secondary))'
+    }
+  };
+
+  // Моковые данные с учетом ролей
+  const allAwardOrders = [
+    { id: 1, number: 'П-001', date: '15.07.2025', type: 'За трудовые заслуги', status: 'approved', employees: 12, approver: 'Иванов И.И.', department: 'direction', createdBy: 1 },
+    { id: 2, number: 'П-002', date: '18.07.2025', type: 'Почётная грамота', status: 'pending', employees: 8, approver: 'Петров П.П.', department: 'nok', createdBy: 2 },
+    { id: 3, number: 'П-003', date: '20.07.2025', type: 'Благодарность', status: 'draft', employees: 5, approver: '-', department: 'center', createdBy: 1 },
+    { id: 4, number: 'П-004', date: '22.07.2025', type: 'Медаль', status: 'rejected', employees: 3, approver: 'Сидоров С.С.', department: 'center', createdBy: 3 },
+    { id: 5, number: 'П-005', date: '23.07.2025', type: 'Почётная грамота', status: 'draft', employees: 7, approver: '-', department: 'nok', createdBy: 2 },
   ];
+
+  // Фильтрация приказов по роли
+  const awardOrders = allAwardOrders.filter(order => {
+    const userPermissions = userRoles[currentUser.role].permissions;
+    if (userPermissions.viewAll) {
+      return true; // Дирекция и НОК видят всё
+    }
+    return order.createdBy === currentUser.id; // Ц видит только свои
+  });
 
   // Моковые данные сотрудников для выбранного приказа
   const mockEmployees = {
@@ -134,6 +202,26 @@ const Index = () => {
     ));
   };
 
+  // Проверка прав доступа
+  const hasPermission = (permission: string) => {
+    return userRoles[currentUser.role].permissions[permission as keyof typeof userRoles[typeof currentUser.role]['permissions']];
+  };
+
+  const getRoleBadge = (role: string) => {
+    const roleConfig = userRoles[role as keyof typeof userRoles];
+    return (
+      <Badge 
+        style={{ 
+          backgroundColor: roleConfig.bgColor, 
+          color: roleConfig.color,
+          border: `1px solid ${roleConfig.color}` 
+        }}
+      >
+        {roleConfig.name}
+      </Badge>
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     const variants = {
       approved: { variant: 'default' as const, label: 'Утверждён', color: 'bg-green-100 text-green-800' },
@@ -143,6 +231,32 @@ const Index = () => {
     };
     const config = variants[status as keyof typeof variants];
     return <Badge className={config.color}>{config.label}</Badge>;
+  };
+
+  const getDepartmentName = (dept: string) => {
+    const deptNames = {
+      direction: 'Дирекция',
+      nok: 'НОК',
+      center: 'Центральные службы'
+    };
+    return deptNames[dept as keyof typeof deptNames] || dept;
+  };
+
+  const switchUserRole = (newRole: string) => {
+    const roleUsers = {
+      direction: { name: 'Петров Петр Петрович', department: 'Дирекция по управлению персоналом', position: 'Начальник отдела' },
+      nok: { name: 'Иванова Мария Сергеевна', department: 'НОК (Начальник отдела кадров)', position: 'Ведущий специалист' },
+      center: { name: 'Сидоров Алексей Петрович', department: 'Центральная служба управления персоналом', position: 'Специалист' }
+    };
+    
+    const userData = roleUsers[newRole as keyof typeof roleUsers];
+    setCurrentUser({
+      ...currentUser,
+      role: newRole,
+      name: userData.name,
+      department: userData.department,
+      position: userData.position
+    });
   };
 
   const filteredOrders = awardOrders.filter(order => {
@@ -286,6 +400,7 @@ const Index = () => {
                     <TableHead className="font-semibold text-gray-700">№ Приказа</TableHead>
                     <TableHead className="font-semibold text-gray-700">Дата</TableHead>
                     <TableHead className="font-semibold text-gray-700">Тип награды</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Подразделение</TableHead>
                     <TableHead className="font-semibold text-gray-700">Статус</TableHead>
                     <TableHead className="font-semibold text-gray-700">Сотрудников</TableHead>
                     <TableHead className="font-semibold text-gray-700">Утверждающий</TableHead>
@@ -298,6 +413,14 @@ const Index = () => {
                       <TableCell className="font-medium">{order.number}</TableCell>
                       <TableCell>{order.date}</TableCell>
                       <TableCell>{order.type}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" style={{
+                          color: userRoles[order.department as keyof typeof userRoles].color,
+                          borderColor: userRoles[order.department as keyof typeof userRoles].color
+                        }}>
+                          {getDepartmentName(order.department)}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{getStatusBadge(order.status)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-1">
@@ -311,12 +434,21 @@ const Index = () => {
                           <Button variant="ghost" size="sm" onClick={() => handleOrderClick(order)}>
                             <Icon name="Eye" size={16} />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleOrderClick(order)}>
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Download" size={16} />
-                          </Button>
+                          {(hasPermission('editOrders') || (order.createdBy === currentUser.id && order.status === 'draft')) && (
+                            <Button variant="ghost" size="sm" onClick={() => handleOrderClick(order)}>
+                              <Icon name="Edit" size={16} />
+                            </Button>
+                          )}
+                          {hasPermission('viewReports') && (
+                            <Button variant="ghost" size="sm">
+                              <Icon name="Download" size={16} />
+                            </Button>
+                          )}
+                          {hasPermission('deleteOrders') && order.status === 'draft' && (
+                            <Button variant="ghost" size="sm" className="text-red-600">
+                              <Icon name="Trash2" size={16} />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -782,6 +914,118 @@ const Index = () => {
                   Закрыть
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог профиля пользователя и ролей */}
+        <Dialog open={userProfileOpen} onOpenChange={setUserProfileOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                Профиль пользователя
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Информация о текущем пользователе */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold text-white"
+                         style={{backgroundColor: userRoles[currentUser.role].color}}>
+                      {currentUser.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <h3 className="font-medium" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                        {currentUser.name}
+                      </h3>
+                      <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                        {currentUser.position}
+                      </p>
+                      <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>
+                        {currentUser.department}
+                      </p>
+                      <div className="mt-2">
+                        {getRoleBadge(currentUser.role)}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Права доступа */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                    Права доступа
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {Object.entries(userRoles[currentUser.role].permissions).map(([key, value]) => {
+                      const labels = {
+                        viewAll: 'Просмотр всех',
+                        createOrders: 'Создание',
+                        editOrders: 'Редактирование',
+                        approveOrders: 'Утверждение',
+                        deleteOrders: 'Удаление',
+                        manageTemplates: 'Шаблоны',
+                        viewReports: 'Отчёты',
+                        manageUsers: 'Пользователи'
+                      };
+                      return (
+                        <div key={key} className="flex items-center space-x-2">
+                          <Icon 
+                            name={value ? "CheckCircle" : "XCircle"} 
+                            size={14} 
+                            className={value ? "text-green-600" : "text-red-400"} 
+                          />
+                          <span style={{color: value ? 'hsl(var(--rzd-gray-dark))' : 'hsl(var(--rzd-gray-medium))'}}>
+                            {labels[key as keyof typeof labels]}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Переключатель ролей (для демо) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm" style={{color: 'hsl(var(--rzd-gray-dark))'}}>
+                    Переключить роль (демо)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 space-y-2">
+                  {Object.entries(userRoles).map(([roleKey, roleData]) => (
+                    <Button
+                      key={roleKey}
+                      variant={currentUser.role === roleKey ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => switchUserRole(roleKey)}
+                      className="w-full justify-start"
+                      style={currentUser.role === roleKey ? {
+                        backgroundColor: roleData.color,
+                        borderColor: roleData.color,
+                        color: 'white'
+                      } : {
+                        borderColor: roleData.color,
+                        color: roleData.color
+                      }}
+                    >
+                      {roleData.name}
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setUserProfileOpen(false)}>
+                Закрыть
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
