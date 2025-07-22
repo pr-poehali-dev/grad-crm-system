@@ -36,22 +36,32 @@ const Index = () => {
     avatar: null
   });
 
-  // Система ролей и прав доступа
+  const [aiScanDialogOpen, setAiScanDialogOpen] = useState(false);
+  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [newOrderData, setNewOrderData] = useState({
+    title: '',
+    event: '',
+    date: new Date().toISOString().split('T')[0],
+    selectedAwards: [],
+    template: ''
+  });
+
+  // Система ролей и прав доступа (ПОМЕНЯНЫ МЕСТАМИ ДИРЕКЦИЯ И Ц)
   const userRoles = {
     direction: {
       name: 'Сотрудник дирекции',
       permissions: {
-        viewAll: true,
+        viewAll: false, // видит только свои
         createOrders: true,
-        editOrders: true,
-        approveOrders: true,
-        deleteOrders: true,
-        manageTemplates: true,
-        viewReports: true,
-        manageUsers: true
+        editOrders: false,
+        approveOrders: false,
+        deleteOrders: false,
+        manageTemplates: false,
+        viewReports: false,
+        manageUsers: false
       },
-      color: 'hsl(var(--rzd-red))',
-      bgColor: 'hsl(var(--rzd-red-light))'
+      color: '#DC2626', // Прямые hex цвета вместо CSS переменных
+      bgColor: '#FEE2E2'
     },
     nok: {
       name: 'Сотрудник НОК',
@@ -65,23 +75,23 @@ const Index = () => {
         viewReports: true,
         manageUsers: false
       },
-      color: 'hsl(var(--rzd-gray-dark))',
-      bgColor: 'hsl(var(--rzd-gray-light))'
+      color: '#374151',
+      bgColor: '#F3F4F6'
     },
     center: {
       name: 'Сотрудник Ц',
       permissions: {
-        viewAll: false, // видит только свои
+        viewAll: true,
         createOrders: true,
-        editOrders: false,
-        approveOrders: false,
-        deleteOrders: false,
-        manageTemplates: false,
-        viewReports: false,
-        manageUsers: false
+        editOrders: true,
+        approveOrders: true,
+        deleteOrders: true,
+        manageTemplates: true,
+        viewReports: true,
+        manageUsers: true
       },
-      color: 'hsl(var(--rzd-gray-medium))',
-      bgColor: 'hsl(var(--secondary))'
+      color: '#6B7280',
+      bgColor: '#F9FAFB'
     }
   };
 
@@ -300,29 +310,29 @@ const Index = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Всего приказов</CardTitle>
-              <Icon name="FileText" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
+              <Icon name="FileText" size={20} style={{color: '#DC2626'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>127</div>
-              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-red))'}}>+12% за месяц</p>
+              <div className="text-3xl font-bold text-gray-800">127</div>
+              <p className="text-xs mt-1" style={{color: '#DC2626'}}>+12% за месяц</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Награждено сотрудников</CardTitle>
-              <Icon name="Users" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
+              <Icon name="Users" size={20} style={{color: '#DC2626'}} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>1,847</div>
-              <p className="text-xs mt-1" style={{color: 'hsl(var(--rzd-red))'}}>+8% за месяц</p>
+              <div className="text-3xl font-bold text-gray-800">1,847</div>
+              <p className="text-xs mt-1" style={{color: '#DC2626'}}>+8% за месяц</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">На рассмотрении</CardTitle>
-              <Icon name="Clock" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
+              <Icon name="Clock" size={20} style={{color: '#DC2626'}} />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>23</div>
@@ -333,7 +343,7 @@ const Index = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Средний срок</CardTitle>
-              <Icon name="TrendingDown" size={20} style={{color: 'hsl(var(--rzd-red))'}} />
+              <Icon name="TrendingDown" size={20} style={{color: '#DC2626'}} />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold" style={{color: 'hsl(var(--rzd-gray-dark))'}}>3.2</div>
@@ -918,6 +928,261 @@ const Index = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Диалог ИИ сканирования Word файлов */}
+        <Dialog open={aiScanDialogOpen} onOpenChange={setAiScanDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-800">
+                ИИ сканирование и анализ Word файлов приказов
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <Alert>
+                <Icon name="Zap" size={16} />
+                <AlertDescription>
+                  Загрузите Word документ с приказом, и ИИ автоматически извлечёт список сотрудников, типы наград, основания и другие данные.
+                </AlertDescription>
+              </Alert>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Icon name="Upload" size={20} style={{color: '#DC2626'}} />
+                    <span>Загрузка документа</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                    <Icon name="FileText" size={48} className="mx-auto mb-4 text-gray-400" />
+                    <p className="text-lg mb-2">Перетащите Word файл сюда</p>
+                    <p className="text-sm text-gray-600 mb-4">или</p>
+                    <Button variant="outline">
+                      <Icon name="Upload" size={16} className="mr-2" />
+                      Выбрать файл
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-2">Поддерживаемые форматы: .doc, .docx</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Icon name="Brain" size={20} style={{color: '#DC2626'}} />
+                    <span>Результаты ИИ анализа</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Моковые результаты для демо */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-3">Обнаружено в документе:</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Тип приказа:</p>
+                        <p className="text-sm">О награждении почётной грамотой</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Количество сотрудников:</p>
+                        <p className="text-sm">5 человек</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Дата приказа:</p>
+                        <p className="text-sm">15 июля 2025 г.</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Подразделение:</p>
+                        <p className="text-sm">НОК</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Извлечённый список сотрудников:</h4>
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50">
+                            <TableHead className="font-semibold">ФИО</TableHead>
+                            <TableHead className="font-semibold">Должность</TableHead>
+                            <TableHead className="font-semibold">Основание</TableHead>
+                            <TableHead className="font-semibold">Статус</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {[
+                            { name: 'Козлов Дмитрий Александрович', position: 'Мастер пути', reason: 'за добросовестный труд' },
+                            { name: 'Петрова Мария Сергеевна', position: 'Инженер-электроник', reason: 'за высокие показатели' },
+                            { name: 'Сидоров Алексей Петрович', position: 'Машинист электропоезда', reason: 'за безаварийную работу' }
+                          ].map((emp, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">{emp.name}</TableCell>
+                              <TableCell>{emp.position}</TableCell>
+                              <TableCell>{emp.reason}</TableCell>
+                              <TableCell>
+                                <Badge className="bg-green-100 text-green-800">Подтверждено</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-end space-x-2 pt-4">
+                    <Button variant="outline">
+                      <Icon name="Edit" size={16} className="mr-2" />
+                      Редактировать
+                    </Button>
+                    <Button style={{backgroundColor: '#DC2626', color: 'white'}}>
+                      <Icon name="Download" size={16} className="mr-2" />
+                      Импортировать в систему
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setAiScanDialogOpen(false)}>
+                Закрыть
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог создания нового приказа */}
+        <Dialog open={createOrderDialogOpen} onOpenChange={setCreateOrderDialogOpen}>
+          <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-800">
+                Создание нового приказа о награждении
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Левая колонка - форма */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Основные данные приказа</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="orderTitle">Наименование приказа *</Label>
+                      <Input
+                        id="orderTitle"
+                        placeholder="О награждении почётной грамотой..."
+                        value={newOrderData.title}
+                        onChange={(e) => setNewOrderData({ ...newOrderData, title: e.target.value })}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="orderEvent">К какому событию приказ *</Label>
+                      <Select value={newOrderData.event} onValueChange={(value) => setNewOrderData({ ...newOrderData, event: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите событие" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="день-ржд">День работников железнодорожного транспорта</SelectItem>
+                          <SelectItem value="проф-праздник">Профессиональный праздник</SelectItem>
+                          <SelectItem value="новый-год">Новогодние праздники</SelectItem>
+                          <SelectItem value="день-победы">День Победы</SelectItem>
+                          <SelectItem value="юбилей">Юбилей предприятия</SelectItem>
+                          <SelectItem value="досрочное">Досрочное награждение</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="orderDate">Дата приказа *</Label>
+                      <Input
+                        id="orderDate"
+                        type="date"
+                        value={newOrderData.date}
+                        onChange={(e) => setNewOrderData({ ...newOrderData, date: e.target.value })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Выбор наград</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {awardTypes.map((award) => (
+                        <div key={award} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={award}
+                            checked={newOrderData.selectedAwards.includes(award)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewOrderData({
+                                  ...newOrderData,
+                                  selectedAwards: [...newOrderData.selectedAwards, award]
+                                });
+                              } else {
+                                setNewOrderData({
+                                  ...newOrderData,
+                                  selectedAwards: newOrderData.selectedAwards.filter(a => a !== award)
+                                });
+                              }
+                            }}
+                          />
+                          <Label htmlFor={award} className="text-sm">{award}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Правая колонка - предпросмотр шаблона */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Предпросмотр шаблона приказа</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-white border rounded-lg p-4 max-h-96 overflow-y-auto text-sm">
+                      {newOrderData.title || newOrderData.event || newOrderData.selectedAwards.length > 0 ? (
+                        <pre className="whitespace-pre-wrap text-sm text-gray-800">
+                          {образецПриказа(newOrderData)}
+                        </pre>
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          <Icon name="FileText" size={48} className="mx-auto mb-4 text-gray-300" />
+                          <p>Заполните данные приказа для предпросмотра шаблона</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end space-x-2 pt-6 border-t">
+              <Button variant="outline" onClick={() => setCreateOrderDialogOpen(false)}>
+                Отмена
+              </Button>
+              <Button variant="outline">
+                <Icon name="Save" size={16} className="mr-2" />
+                Сохранить черновик
+              </Button>
+              <Button 
+                style={{backgroundColor: '#DC2626', color: 'white'}}
+                disabled={!newOrderData.title || !newOrderData.event || newOrderData.selectedAwards.length === 0}
+              >
+                <Icon name="Send" size={16} className="mr-2" />
+                Создать приказ
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Диалог профиля пользователя и ролей */}
         <Dialog open={userProfileOpen} onOpenChange={setUserProfileOpen}>
           <DialogContent className="max-w-md">
@@ -964,6 +1229,35 @@ const Index = () => {
                 <CardContent className="p-4 pt-0">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(userRoles[currentUser.role].permissions).map(([key, value]) => {
+  const образецПриказа = (orderData) => {
+    const eventNames = {
+      'день-ржд': 'Дня работников железнодорожного транспорта',
+      'проф-праздник': 'Профессионального праздника',
+      'новый-год': 'Новогодних праздников',
+      'день-победы': 'Дня Победы',
+      'юбилей': 'юбилея предприятия',
+      'досрочное': 'досрочного награждения'
+    };
+    
+    return `ОАО "Российские железные дороги"
+
+ПРИКАЗ № П-___ от ${new Date(orderData.date).toLocaleDateString('ru-RU')}
+
+${orderData.title || 'О награждении'}
+
+${orderData.event ? `В связи с ${eventNames[orderData.event] || orderData.event}` : ''}
+
+${orderData.selectedAwards.length > 0 ? 
+  `Наградить следующими наградами:
+${orderData.selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}` 
+  : 'Награды будут указаны после выбора'
+}
+
+Список награждаемых сотрудников будет добавлен после создания приказа.
+
+Президент ОАО "РЖД" О.В. Белозёров`;
+  };
+
                       const labels = {
                         viewAll: 'Просмотр всех',
                         createOrders: 'Создание',
