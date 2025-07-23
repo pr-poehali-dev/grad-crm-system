@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Sections from "./pages/Sections";
 import Orders from "./pages/Orders";
+import OrderDetails from "./pages/OrderDetails";
 import Reports from "./pages/Reports";
 import AwardsOrganization from "./pages/AwardsOrganization";
 import AwardsList from "./pages/AwardsList";
@@ -32,6 +33,11 @@ const App = () => (
           <Route path="/orders" element={
             <ProtectedRoute>
               <Orders />
+            </ProtectedRoute>
+          } />
+          <Route path="/orders/:orderId" element={
+            <ProtectedRoute>
+              <OrderDetails />
             </ProtectedRoute>
           } />
           <Route path="/reports" element={

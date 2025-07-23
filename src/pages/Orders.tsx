@@ -299,8 +299,7 @@ ${selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}
   };
 
   const handleViewOrder = (order: any) => {
-    setSelectedOrder(order);
-    generateOrderTemplate();
+    navigate(`/orders/${order.id}`);
   };
 
   const handleNotificationSelect = (id: number) => {
@@ -462,8 +461,9 @@ ${selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}
                           </div>
                           {notification.orderId && (
                             <Button size="sm" variant="outline" onClick={() => {
-                              const order = mockOrders.find(o => o.id === notification.orderId);
-                              if (order) handleViewOrder(order);
+                              if (notification.orderId) {
+                                navigate(`/orders/${notification.orderId}`);
+                              }
                             }}>
                               <Icon name="Eye" size={14} className="mr-1" />
                               Просмотр
