@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Sections from "./pages/Sections";
 import Orders from "./pages/Orders";
 import Reports from "./pages/Reports";
+import AwardsOrganization from "./pages/AwardsOrganization";
+import AwardsList from "./pages/AwardsList";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +37,16 @@ const App = () => (
           <Route path="/reports" element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          } />
+          <Route path="/awards-organization" element={
+            <ProtectedRoute>
+              <AwardsOrganization />
+            </ProtectedRoute>
+          } />
+          <Route path="/awards-list/:regionId" element={
+            <ProtectedRoute>
+              <AwardsList />
             </ProtectedRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

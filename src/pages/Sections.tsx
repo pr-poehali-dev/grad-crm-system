@@ -41,6 +41,14 @@ const Sections = () => {
       icon: 'BarChart3',
       color: 'bg-green-500',
       route: '/reports'
+    },
+    {
+      id: 'awards-organization',
+      title: 'Организация награждения',
+      description: 'Составление списков награждения по регионам и дирекциям с управлением кандидатами',
+      icon: 'Users',
+      color: 'bg-purple-500',
+      route: '/awards-organization'
     }
   ];
 
@@ -79,7 +87,7 @@ const Sections = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {sections.map((section) => (
               <Card key={section.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardHeader className="pb-4">
