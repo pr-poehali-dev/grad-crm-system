@@ -40,7 +40,7 @@ const Login = () => {
       localStorage.setItem('isAuthenticated', 'true');
       
       // Перенаправляем в систему
-      navigate('/dashboard');
+      navigate('/sections');
     } else {
       setError('Неверный логин или пароль');
     }
