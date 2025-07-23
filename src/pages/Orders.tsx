@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -412,6 +413,51 @@ ${selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}
                   Новый приказ
                 </Button>
               </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Быстрое создание приказа</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Номер приказа</Label>
+                      <Input placeholder="П-1234" />
+                    </div>
+                    <div>
+                      <Label>Дата</Label>
+                      <Input type="date" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Заголовок</Label>
+                    <Input placeholder="О награждении сотрудников" />
+                  </div>
+                  <div>
+                    <Label>Регион</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите регион" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regions.map(region => (
+                          <SelectItem key={region} value={region}>{region}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                      Отмена
+                    </Button>
+                    <Button onClick={() => {
+                      setIsCreateDialogOpen(false);
+                      // Переход на полную форму создания
+                    }}>
+                      Создать
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
             </Dialog>
           </div>
 
@@ -772,52 +818,7 @@ ${selectedAwards.map((award, index) => `${index + 1}. ${award}`).join('\n')}
         </Tabs>
       </div>
 
-      {/* Dialog для быстрого создания */}
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Быстрое создание приказа</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Номер приказа</Label>
-              <Input placeholder="П-1234" />
-            </div>
-            <div>
-              <Label>Дата</Label>
-              <Input type="date" />
-            </div>
-          </div>
-          <div>
-            <Label>Заголовок</Label>
-            <Input placeholder="О награждении сотрудников" />
-          </div>
-          <div>
-            <Label>Регион</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите регион" />
-              </SelectTrigger>
-              <SelectContent>
-                {regions.map(region => (
-                  <SelectItem key={region} value={region}>{region}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              Отмена
-            </Button>
-            <Button onClick={() => {
-              setIsCreateDialogOpen(false);
-              // Переход на полную форму создания
-            }}>
-              Создать
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
+
     </div>
   );
 };
