@@ -232,7 +232,7 @@ const AwardsOrganization = () => {
                   </Button>
                   <Button variant="outline">
                     <Icon name="FileText" size={16} className="mr-2" />
-                    Сводный отчет
+                    Сводная проверка
                   </Button>
                   <Button variant="outline">
                     <Icon name="Settings" size={16} className="mr-2" />

@@ -412,7 +412,7 @@ const Index = () => {
           <div className="flex items-center space-x-4">
             <Button variant="outline" size="sm">
               <Icon name="FileText" size={16} className="mr-2" />
-              Экспорт отчёта
+              Экспорт проверки
             </Button>
             <Button size="sm">
               <Icon name="Plus" size={16} className="mr-2" />
@@ -619,7 +619,7 @@ const Index = () => {
               <CardContent className="p-6 text-center">
                 <Icon name="BarChart" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
                 <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Аналитика</h4>
-                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Просмотреть статистику и отчёты по награждениям</p>
+                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Просмотреть статистику и проверки по награждениям</p>
               </CardContent>
             </Card>
           </div>
@@ -1362,7 +1362,7 @@ const Index = () => {
                         approveOrders: 'Утверждение',
                         deleteOrders: 'Удаление',
                         manageTemplates: 'Шаблоны',
-                        viewReports: 'Отчёты',
+                        viewReports: 'Проверки',
                         manageUsers: 'Пользователи'
                       };
                       return (

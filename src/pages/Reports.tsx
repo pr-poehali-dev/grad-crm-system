@@ -33,14 +33,14 @@ const Reports = () => {
     return roleNames[role] || role;
   };
 
-  // State для фильтров отчетов
+  // State для фильтров проверок
   const [dateFrom, setDateFrom] = useState('2024-01-01');
   const [dateTo, setDateTo] = useState('2024-03-31');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedAwardType, setSelectedAwardType] = useState('all');
   const [selectedEnterprise, setSelectedEnterprise] = useState('all');
 
-  // Мокованные данные для отчетов
+  // Мокованные данные для проверок
   const mockEnterprises = [
     {
       id: 1,
@@ -146,7 +146,7 @@ const Reports = () => {
   }, {} as { [key: string]: number });
 
   const handleExportReport = () => {
-    console.log('Экспорт отчета за период:', { dateFrom, dateTo, selectedRegion });
+    console.log('Экспорт проверки за период:', { dateFrom, dateTo, selectedRegion });
     // Здесь будет логика экспорта
   };
 
@@ -161,7 +161,7 @@ const Reports = () => {
               Назад
             </Button>
             <Icon name="BarChart3" size={24} className="text-green-600" />
-            <h1 className="text-xl font-semibold text-gray-900">Отчеты по наградам</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Проверки по наградам</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-600">
@@ -181,7 +181,7 @@ const Reports = () => {
         {/* Фильтры */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Параметры отчета</CardTitle>
+            <CardTitle>Параметры проверки</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -286,7 +286,7 @@ const Reports = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Предприятий в отчете</CardTitle>
+                  <CardTitle className="text-sm font-medium">Предприятий в проверке</CardTitle>
                   <Icon name="Building" className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
