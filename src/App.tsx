@@ -11,6 +11,8 @@ import OrderDetails from "./pages/OrderDetails";
 import Reports from "./pages/Reports";
 import AwardsOrganization from "./pages/AwardsOrganization";
 import AwardsList from "./pages/AwardsList";
+import Petitions from "./pages/Petitions";
+import CreatePetition from "./pages/CreatePetition";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +55,16 @@ const App = () => (
           <Route path="/awards-list/:regionId" element={
             <ProtectedRoute>
               <AwardsList />
+            </ProtectedRoute>
+          } />
+          <Route path="/petitions" element={
+            <ProtectedRoute>
+              <Petitions />
+            </ProtectedRoute>
+          } />
+          <Route path="/petitions/create" element={
+            <ProtectedRoute>
+              <CreatePetition />
             </ProtectedRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

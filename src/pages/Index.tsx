@@ -598,12 +598,20 @@ const Index = () => {
         {/* Быстрые действия */}
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Быстрые действия</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="p-6 text-center">
                 <Icon name="FileText" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
                 <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Создать приказ</h4>
                 <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Сформировать новый приказ о награждении сотрудников</p>
+              </CardContent>
+            </Card>
+
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/petitions')}>
+              <CardContent className="p-6 text-center">
+                <Icon name="FileTextX" size={48} className="mx-auto mb-3" style={{color: 'hsl(var(--rzd-red))'}} />
+                <h4 className="font-semibold mb-2" style={{color: 'hsl(var(--rzd-gray-dark))'}}>Ходатайства</h4>
+                <p className="text-sm" style={{color: 'hsl(var(--rzd-gray-medium))'}}>Создать и управлять ходатайствами на награждение</p>
               </CardContent>
             </Card>
 
