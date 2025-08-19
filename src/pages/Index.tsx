@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to get notification icon based on type
 const getNotificationIcon = (type: string): string => {
@@ -80,6 +81,8 @@ ${eventNames[orderData.event] || ''}
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // Helper function to get notification icon based on type
   const getNotificationIcon = (type: string): string => {
     const iconMap: { [key: string]: string } = {
